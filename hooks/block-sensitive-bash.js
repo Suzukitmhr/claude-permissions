@@ -1,4 +1,17 @@
-const input = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+const fs = require('fs');
+
+let input;
+try {
+  const data = fs.readFileSync(0, 'utf8').trim();
+  if (!data) {
+    process.exit(0);
+  }
+  input = JSON.parse(data);
+} catch (err) {
+  console.error(`[Hook Error] block-sensitive-bash.js: JSON parse failed: ${err.message}`);
+  process.exit(1);
+}
+
 const command = input?.tool_input?.command || '';
 
 const blockedPatterns = [
