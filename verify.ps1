@@ -29,6 +29,24 @@ Write-Host "=== ファイル存在チェック ==="
 Check "settings.json が存在する"           (Test-Path $settingsPath)
 Check "block-sensitive-files.js が存在する" (Test-Path (Join-Path $hooksDir "block-sensitive-files.js"))
 Check "block-sensitive-bash.js が存在する"  (Test-Path (Join-Path $hooksDir "block-sensitive-bash.js"))
+Check "check-version.js が存在する"        (Test-Path (Join-Path $hooksDir "check-version.js"))
+Check ".install-source が存在する"         (Test-Path (Join-Path $claudeDir ".install-source"))
+
+# バージョン情報を表示
+try {
+  $settingsObj = Get-Content $settingsPath -Raw | ConvertFrom-Json
+  $installedVersion = $settingsObj.version
+  if ($installedVersion) {
+    Write-Host "  [INFO] インストール済みバージョン: v$installedVersion"
+  }
+} catch {}
+
+try {
+  $installSource = Get-Content (Join-Path $claudeDir ".install-source") -Raw
+  if ($installSource) {
+    Write-Host "  [INFO] リモートURL: $installSource"
+  }
+} catch {}
 
 Write-Host ""
 Write-Host "=== settings.json 内容チェック ==="

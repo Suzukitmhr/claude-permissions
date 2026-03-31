@@ -24,6 +24,19 @@ echo "=== ファイル存在チェック ==="
 [ -f "$CLAUDE_DIR/settings.json" ]       && check "settings.json が存在する" "ok" || check "settings.json が存在する" "fail"
 [ -f "$HOOKS_DIR/block-sensitive-files.js" ] && check "block-sensitive-files.js が存在する" "ok" || check "block-sensitive-files.js が存在する" "fail"
 [ -f "$HOOKS_DIR/block-sensitive-bash.js" ]  && check "block-sensitive-bash.js が存在する" "ok" || check "block-sensitive-bash.js が存在する" "fail"
+[ -f "$HOOKS_DIR/check-version.js" ]    && check "check-version.js が存在する" "ok" || check "check-version.js が存在する" "fail"
+[ -f "$CLAUDE_DIR/.install-source" ]     && check ".install-source が存在する" "ok" || check ".install-source が存在する" "fail"
+
+# バージョン情報を表示
+INSTALLED_VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$CLAUDE_DIR/settings.json','utf8')).version || '')" 2>/dev/null)
+if [ -n "$INSTALLED_VERSION" ]; then
+  echo "  [INFO] インストール済みバージョン: v$INSTALLED_VERSION"
+fi
+
+if [ -f "$CLAUDE_DIR/.install-source" ]; then
+  INSTALL_SOURCE=$(cat "$CLAUDE_DIR/.install-source")
+  echo "  [INFO] リモートURL: $INSTALL_SOURCE"
+fi
 
 echo ""
 echo "=== settings.json 内容チェック ==="

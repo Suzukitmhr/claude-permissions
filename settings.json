@@ -1,4 +1,5 @@
 {
+  "version": "1.0.0",
   "env": {
     "CLAUDE_CODE_USE_BEDROCK": "1",
     "CLAUDE_CODE_SUBAGENT_MODEL":"jp.anthropic.claude-sonnet-4-6",
@@ -9,6 +10,15 @@
   },
   "hooks": {
     "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-version.js"
+          }
+        ]
+      },
       {
         "matcher": "Read",
         "hooks": [

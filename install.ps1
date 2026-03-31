@@ -7,6 +7,7 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $claudeDir = Join-Path $HOME ".claude"
 $hooksDir = Join-Path $claudeDir "hooks"
 $backupDir = Join-Path $claudeDir "backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+$installSourcePath = Join-Path $claudeDir ".install-source"
 
 # ソースファイルの存在確認
 $sourceSettings = Join-Path $scriptDir "settings.json"
@@ -59,6 +60,25 @@ if (Test-Path $sourceHooksDir) {
     Write-Host "[インストール] hooks/ -> $hooksDir"
 } else {
     Write-Host "[スキップ] hooks ディレクトリが見つかりません: $sourceHooksDir"
+}
+
+# バージョン情報を表示
+$sourceSettings = Join-Path $scriptDir "settings.json"
+$settingsContent = Get-Content $sourceSettings -Raw | ConvertFrom-Json
+$version = $settingsContent.version
+if ($version) {
+    Write-Host "[バージョン] v$version"
+}
+
+# リモートURLを保存
+try {
+    $remoteUrl = git -C $scriptDir remote get-url origin 2>$null
+    if ($remoteUrl) {
+        Set-Content -Path $installSourcePath -Value $remoteUrl -NoNewline
+        Write-Host "[設定] リモートURL -> $installSourcePath"
+    }
+} catch {
+    Write-Host "[スキップ] git リモートURLの取得に失敗しました"
 }
 
 Write-Host ""

@@ -59,6 +59,21 @@ else
   echo "[スキップ] hooks ディレクトリが見つかりません: $SOURCE_HOOKS_DIR"
 fi
 
+# バージョン情報を表示
+VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$SOURCE_SETTINGS','utf8')).version || '')" 2>/dev/null)
+if [ -n "$VERSION" ]; then
+  echo "[バージョン] v$VERSION"
+fi
+
+# リモートURLを保存
+REMOTE_URL=$(git -C "$SCRIPT_DIR" remote get-url origin 2>/dev/null)
+if [ -n "$REMOTE_URL" ]; then
+  printf '%s' "$REMOTE_URL" > "$CLAUDE_DIR/.install-source"
+  echo "[設定] リモートURL -> $CLAUDE_DIR/.install-source"
+else
+  echo "[スキップ] git リモートURLの取得に失敗しました"
+fi
+
 echo ""
 echo "インストールが完了しました。"
 if [ "$BACKUP_CREATED" = true ]; then
