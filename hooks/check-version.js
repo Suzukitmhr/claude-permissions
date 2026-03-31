@@ -1,22 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 const os = require('os');
-
-// 1日1回だけチェックする（tempファイルで制御）
-const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-const markerPath = path.join(os.tmpdir(), `claude-version-check-${today}`);
-
-if (fs.existsSync(markerPath)) {
-  process.exit(0);
-}
-
-// マーカーファイルを作成（以降の呼び出しではスキップ）
-try {
-  fs.writeFileSync(markerPath, today);
-} catch (_) {
-  // マーカー作成失敗しても続行
-}
 
 // インストール元のリモートURL取得
 const claudeDir = path.join(os.homedir(), '.claude');
@@ -95,10 +80,23 @@ function compareVersions(a, b) {
 }
 
 if (compareVersions(installedVersion, latestVersion) < 0) {
-  console.error(
-    `\n⚠ Claude Code の設定が古くなっています (v${installedVersion} → v${latestVersion})。\n` +
-    `  install.ps1 または install.sh を再実行してください。\n`
-  );
+  // Windows バルーン通知
+  try {
+    const title = 'Claude Code 設定の更新';
+    const msg = `v${installedVersion} -> v${latestVersion} に更新があります。install.ps1 を再実行してください。`;
+    const script = `
+Add-Type -AssemblyName System.Windows.Forms
+$n = New-Object System.Windows.Forms.NotifyIcon
+$n.Icon = [System.Drawing.SystemIcons]::Warning
+$n.Visible = $true
+$n.ShowBalloonTip(8000, '${title}', '${msg}', 'Warning')
+Start-Sleep 3
+$n.Dispose()
+`;
+    spawnSync('powershell', ['-Command', script], { timeout: 8000 });
+  } catch (_) {
+    // 通知失敗は無視
+  }
 }
 
 process.exit(0);
