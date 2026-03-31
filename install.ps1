@@ -1,26 +1,26 @@
-﻿# Claude Code 権限設定インストールスクリプト
-# GitHub からソースを取得して ~/.claude/ にインストールします
+# Claude Code permission settings installer
+# Gets source from GitHub and installs to ~/.claude/
 
 $ErrorActionPreference = "Stop"
 
 $repoUrl = "https://github.com/Suzukitmhr/claude-permissions.git"
 $tempDir = Join-Path $env:TEMP "claude-permission-install"
 
-# clone または pull
+# clone or pull
 if (Test-Path (Join-Path $tempDir ".git")) {
-    Write-Host "[更新] リポジトリを pull します: $tempDir"
+    Write-Host "[Update] Pulling repo: $tempDir"
     git -C $tempDir pull
 } else {
-    Write-Host "[取得] リポジトリを clone します: $repoUrl"
+    Write-Host "[Download] Cloning repo: $repoUrl"
     git clone $repoUrl $tempDir
 }
 
-# copy_local.ps1 を実行
+# Run copy_local.ps1
 $localInstall = Join-Path $tempDir "copy_local.ps1"
 if (-not (Test-Path $localInstall)) {
-    Write-Error "copy_local.ps1 が見つかりません: $localInstall"
+    Write-Error "copy_local.ps1 not found: $localInstall"
     exit 1
 }
 
-# 実行ポリシーに依存しないよう、ファイル内容をインライン実行
+# Run file content inline to avoid execution policy issues
 Get-Content $localInstall -Raw | Invoke-Expression

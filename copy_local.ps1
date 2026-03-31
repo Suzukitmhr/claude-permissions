@@ -1,5 +1,5 @@
-﻿# Claude Code 権限設定インストールスクリプト
-# ユーザディレクトリの ~/.claude/ に settings.json と hooks を配置します
+# Claude Code permission settings installer (local copy)
+# Copies settings.json and hooks to ~/.claude/
 
 $ErrorActionPreference = "Stop"
 
@@ -9,28 +9,28 @@ $hooksDir = Join-Path $claudeDir "hooks"
 $backupDir = Join-Path $claudeDir "backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
 $installSourcePath = Join-Path $claudeDir ".install-source"
 
-# ソースファイルの存在確認
+# Check source files
 $sourceSettings = Join-Path $scriptDir "settings.json"
 $sourceHooksDir = Join-Path $scriptDir "hooks"
 
 if (-not (Test-Path $sourceSettings)) {
-    Write-Error "settings.json が見つかりません: $sourceSettings"
+    Write-Error "settings.json not found: $sourceSettings"
     exit 1
 }
 
-# .claude ディレクトリがなければ作成
+# Create .claude folder if needed
 if (-not (Test-Path $claudeDir)) {
     New-Item -ItemType Directory -Path $claudeDir | Out-Null
-    Write-Host "[作成] $claudeDir"
+    Write-Host "[Created] $claudeDir"
 }
 
-# バックアップ作成
+# Backup old files
 $backupCreated = $false
 
 if (Test-Path (Join-Path $claudeDir "settings.json")) {
     New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
     Copy-Item (Join-Path $claudeDir "settings.json") (Join-Path $backupDir "settings.json")
-    Write-Host "[バックアップ] settings.json -> $backupDir"
+    Write-Host "[Backup] settings.json -> $backupDir"
     $backupCreated = $true
 }
 
@@ -39,50 +39,49 @@ if (Test-Path $hooksDir) {
         New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
     }
     Copy-Item $hooksDir (Join-Path $backupDir "hooks") -Recurse
-    Write-Host "[バックアップ] hooks/ -> $backupDir"
+    Write-Host "[Backup] hooks/ -> $backupDir"
     $backupCreated = $true
 }
 
 if (-not $backupCreated) {
-    Write-Host "[情報] 既存ファイルがないためバックアップは不要です"
+    Write-Host "[Info] No old files found, backup not needed"
 }
 
-# settings.json をコピー
+# Copy settings.json
 Copy-Item $sourceSettings (Join-Path $claudeDir "settings.json") -Force
-Write-Host "[インストール] settings.json -> $claudeDir"
+Write-Host "[Install] settings.json -> $claudeDir"
 
-# hooks をコピー
+# Copy hooks
 if (Test-Path $sourceHooksDir) {
     if (-not (Test-Path $hooksDir)) {
         New-Item -ItemType Directory -Path $hooksDir | Out-Null
     }
     Copy-Item (Join-Path $sourceHooksDir "*") $hooksDir -Recurse -Force
-    Write-Host "[インストール] hooks/ -> $hooksDir"
+    Write-Host "[Install] hooks/ -> $hooksDir"
 } else {
-    Write-Host "[スキップ] hooks ディレクトリが見つかりません: $sourceHooksDir"
+    Write-Host "[Skip] hooks folder not found: $sourceHooksDir"
 }
 
-# バージョン情報を表示
-$sourceSettings = Join-Path $scriptDir "settings.json"
+# Show version
 $settingsContent = Get-Content $sourceSettings -Raw | ConvertFrom-Json
 $version = $settingsContent.version
 if ($version) {
-    Write-Host "[バージョン] v$version"
+    Write-Host "[Version] v$version"
 }
 
-# リモートURLを保存
+# Save remote URL
 try {
     $remoteUrl = git -C $scriptDir remote get-url origin 2>$null
     if ($remoteUrl) {
         Set-Content -Path $installSourcePath -Value $remoteUrl -NoNewline
-        Write-Host "[設定] リモートURL -> $installSourcePath"
+        Write-Host "[Saved] Remote URL -> $installSourcePath"
     }
 } catch {
-    Write-Host "[スキップ] git リモートURLの取得に失敗しました"
+    Write-Host "[Skip] Could not get git remote URL"
 }
 
 Write-Host ""
-Write-Host "インストールが完了しました。" -ForegroundColor Green
+Write-Host "Done! Install is complete." -ForegroundColor Green
 if ($backupCreated) {
-    Write-Host "バックアップ: $backupDir" -ForegroundColor Yellow
+    Write-Host "Backup saved at: $backupDir" -ForegroundColor Yellow
 }

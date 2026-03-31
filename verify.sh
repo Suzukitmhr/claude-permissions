@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Claude Code 権限設定 検証スクリプト
-# インストールが正しく適用されているかを確認します
+# Claude Code permission settings checker
+# Makes sure the install was done right
 
 CLAUDE_DIR="$HOME/.claude"
 HOOKS_DIR="$CLAUDE_DIR/hooks"
@@ -19,108 +19,108 @@ check() {
   fi
 }
 
-echo "=== ファイル存在チェック ==="
+echo "=== File check ==="
 
-[ -f "$CLAUDE_DIR/settings.json" ]       && check "settings.json が存在する" "ok" || check "settings.json が存在する" "fail"
-[ -f "$HOOKS_DIR/block-sensitive-files.js" ] && check "block-sensitive-files.js が存在する" "ok" || check "block-sensitive-files.js が存在する" "fail"
-[ -f "$HOOKS_DIR/block-sensitive-bash.js" ]  && check "block-sensitive-bash.js が存在する" "ok" || check "block-sensitive-bash.js が存在する" "fail"
-[ -f "$HOOKS_DIR/check-version.js" ]    && check "check-version.js が存在する" "ok" || check "check-version.js が存在する" "fail"
-[ -f "$CLAUDE_DIR/.install-source" ]     && check ".install-source が存在する" "ok" || check ".install-source が存在する" "fail"
+[ -f "$CLAUDE_DIR/settings.json" ]           && check "settings.json exists" "ok"           || check "settings.json exists" "fail"
+[ -f "$HOOKS_DIR/block-sensitive-files.js" ]  && check "block-sensitive-files.js exists" "ok" || check "block-sensitive-files.js exists" "fail"
+[ -f "$HOOKS_DIR/block-sensitive-bash.js" ]   && check "block-sensitive-bash.js exists" "ok"  || check "block-sensitive-bash.js exists" "fail"
+[ -f "$HOOKS_DIR/check-version.js" ]          && check "check-version.js exists" "ok"        || check "check-version.js exists" "fail"
+[ -f "$CLAUDE_DIR/.install-source" ]           && check ".install-source exists" "ok"         || check ".install-source exists" "fail"
 
-# バージョン情報を表示
+# Show version info
 INSTALLED_VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$CLAUDE_DIR/settings.json','utf8')).version || '')" 2>/dev/null)
 if [ -n "$INSTALLED_VERSION" ]; then
-  echo "  [INFO] インストール済みバージョン: v$INSTALLED_VERSION"
+  echo "  [INFO] Installed version: v$INSTALLED_VERSION"
 fi
 
 if [ -f "$CLAUDE_DIR/.install-source" ]; then
   INSTALL_SOURCE=$(cat "$CLAUDE_DIR/.install-source")
-  echo "  [INFO] リモートURL: $INSTALL_SOURCE"
+  echo "  [INFO] Remote URL: $INSTALL_SOURCE"
 fi
 
 echo ""
-echo "=== settings.json 内容チェック ==="
+echo "=== settings.json check ==="
 
 SETTINGS="$CLAUDE_DIR/settings.json"
 
 grep -q '"CLAUDE_CODE_USE_BEDROCK"' "$SETTINGS" \
-  && check "Bedrockモードが設定されている" "ok" \
-  || check "Bedrockモードが設定されている" "fail"
+  && check "Bedrock mode is set" "ok" \
+  || check "Bedrock mode is set" "fail"
 
 grep -q '"PreToolUse"' "$SETTINGS" \
-  && check "PreToolUseフックが設定されている" "ok" \
-  || check "PreToolUseフックが設定されている" "fail"
+  && check "PreToolUse hooks are set" "ok" \
+  || check "PreToolUse hooks are set" "fail"
 
 grep -q '"Bash(sudo:\*)' "$SETTINGS" || grep -q 'Bash(sudo' "$SETTINGS" \
-  && check "sudo ブロックが設定されている" "ok" \
-  || check "sudo ブロックが設定されている" "fail"
+  && check "sudo is blocked" "ok" \
+  || check "sudo is blocked" "fail"
 
 grep -q '\.aws' "$SETTINGS" \
-  && check "AWS認証情報ブロックが設定されている" "ok" \
-  || check "AWS認証情報ブロックが設定されている" "fail"
+  && check "AWS credentials are blocked" "ok" \
+  || check "AWS credentials are blocked" "fail"
 
 grep -q '\.pem' "$SETTINGS" \
-  && check "秘密鍵ブロックが設定されている" "ok" \
-  || check "秘密鍵ブロックが設定されている" "fail"
+  && check "Private keys are blocked" "ok" \
+  || check "Private keys are blocked" "fail"
 
 grep -q 'docker-compose' "$SETTINGS" \
-  && check "docker-compose ブロックが設定されている" "ok" \
-  || check "docker-compose ブロックが設定されている" "fail"
+  && check "docker-compose is blocked" "ok" \
+  || check "docker-compose is blocked" "fail"
 
 echo ""
-echo "=== フック動作テスト ==="
+echo "=== Hook test ==="
 
-# .env をブロックするか確認
+# Check .env is blocked
 ENV_INPUT='{"tool_input":{"path":"/home/user/project/.env"}}'
 echo "$ENV_INPUT" | node "$HOOKS_DIR/block-sensitive-files.js" > /dev/null 2>&1
 [ $? -eq 2 ] \
-  && check ".env の Read をブロックする" "ok" \
-  || check ".env の Read をブロックする" "fail"
+  && check "Blocks Read of .env" "ok" \
+  || check "Blocks Read of .env" "fail"
 
-# AWS credentials をブロックするか確認
+# Check AWS credentials is blocked
 AWS_INPUT='{"tool_input":{"path":"/home/user/.aws/credentials"}}'
 echo "$AWS_INPUT" | node "$HOOKS_DIR/block-sensitive-files.js" > /dev/null 2>&1
 [ $? -eq 2 ] \
-  && check ".aws/credentials の Read をブロックする" "ok" \
-  || check ".aws/credentials の Read をブロックする" "fail"
+  && check "Blocks Read of .aws/credentials" "ok" \
+  || check "Blocks Read of .aws/credentials" "fail"
 
-# .pem をブロックするか確認
+# Check .pem is blocked
 PEM_INPUT='{"tool_input":{"path":"/home/user/certs/server.pem"}}'
 echo "$PEM_INPUT" | node "$HOOKS_DIR/block-sensitive-files.js" > /dev/null 2>&1
 [ $? -eq 2 ] \
-  && check ".pem の Read をブロックする" "ok" \
-  || check ".pem の Read をブロックする" "fail"
+  && check "Blocks Read of .pem" "ok" \
+  || check "Blocks Read of .pem" "fail"
 
-# 通常ファイルはブロックしないか確認
+# Check normal files are not blocked
 NORMAL_INPUT='{"tool_input":{"path":"/home/user/project/main.js"}}'
 echo "$NORMAL_INPUT" | node "$HOOKS_DIR/block-sensitive-files.js" > /dev/null 2>&1
 [ $? -eq 0 ] \
-  && check "通常ファイルはブロックしない" "ok" \
-  || check "通常ファイルはブロックしない" "fail"
+  && check "Allows Read of normal files" "ok" \
+  || check "Allows Read of normal files" "fail"
 
-# Bash フック: .env を含むコマンドをブロックするか確認
+# Check Bash .env access is blocked
 BASH_ENV_INPUT='{"tool_input":{"command":"cat .env"}}'
 echo "$BASH_ENV_INPUT" | node "$HOOKS_DIR/block-sensitive-bash.js" > /dev/null 2>&1
 [ $? -eq 2 ] \
-  && check "Bash での .env アクセスをブロックする" "ok" \
-  || check "Bash での .env アクセスをブロックする" "fail"
+  && check "Blocks Bash access to .env" "ok" \
+  || check "Blocks Bash access to .env" "fail"
 
-# Bash フック: 通常コマンドはブロックしないか確認
+# Check normal Bash commands are not blocked
 BASH_NORMAL_INPUT='{"tool_input":{"command":"ls -la"}}'
 echo "$BASH_NORMAL_INPUT" | node "$HOOKS_DIR/block-sensitive-bash.js" > /dev/null 2>&1
 [ $? -eq 0 ] \
-  && check "Bash 通常コマンドはブロックしない" "ok" \
-  || check "Bash 通常コマンドはブロックしない" "fail"
+  && check "Allows normal Bash commands" "ok" \
+  || check "Allows normal Bash commands" "fail"
 
 echo ""
-echo "=== 結果 ==="
-echo "  合格: $PASS  失敗: $FAIL"
+echo "=== Result ==="
+echo "  Pass: $PASS  Fail: $FAIL"
 echo ""
 
 if [ $FAIL -eq 0 ]; then
-  echo "すべてのチェックが合格しました。"
+  echo "All checks passed!"
   exit 0
 else
-  echo "失敗したチェックがあります。install.sh を再実行してください。" >&2
+  echo "Some checks failed. Please run install.sh again." >&2
   exit 1
 fi
