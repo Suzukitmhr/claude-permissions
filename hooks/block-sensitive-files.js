@@ -19,6 +19,8 @@ const blockedPatterns = [
   /\.env\./,
   /appsettings\.json$/,
   /appsettings\..+\.json$/,
+  /ssc-connections\.json$/,
+  /ssc-connections\..+\.json$/,
   /id_rsa$/,
   /id_ed25519$/,
   // AWS認証情報
@@ -32,6 +34,8 @@ const blockedPatterns = [
   // Dockerシークレット
   /docker-compose\.yml$/,
   /docker-compose\..+\.yml$/,
+  // 設定ファイル
+  /config\.xml$/,
 ];
 
 const isBlocked = blockedPatterns.some(pattern => pattern.test(filePath));
