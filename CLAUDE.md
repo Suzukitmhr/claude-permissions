@@ -20,3 +20,13 @@
 ## フックの規約
 
 フックはstdinからJSON形式でツール入力を受け取ります。終了コード 0 = 許可、終了コード 2 = ブロック（Claudeに通知）。エラーメッセージはstderrに出力します。
+
+## ブロック対象ファイルの追加
+
+ユーザから読み込み対象外にしたいファイルパターンを指示された場合、以下の3ファイルすべてを更新すること:
+
+1. **settings.json** — `permissions.deny` 配列に `Read(パターン)` を追加
+2. **hooks/block-sensitive-files.js** — `blockedPatterns` 配列に対応する正規表現を追加
+3. **hooks/block-sensitive-bash.js** — `blockedPatterns` 配列に対応する正規表現を追加
+
+3ファイルのブロックパターンは常に同期を保つこと。

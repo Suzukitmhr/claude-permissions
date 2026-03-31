@@ -3,7 +3,8 @@ const command = input?.tool_input?.command || '';
 
 const blockedPatterns = [
   /\.env(\s|$|\.)/,
-  /appsettings\.(Staging|Production|Development)\.json/,
+  /appsettings\.json/,
+  /appsettings\..+\.json/,
   /id_rsa/,
   /id_ed25519/,
 ];
