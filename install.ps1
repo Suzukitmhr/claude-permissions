@@ -1,4 +1,4 @@
-# Claude Code 権限設定インストールスクリプト
+﻿# Claude Code 権限設定インストールスクリプト
 # ユーザディレクトリの ~/.claude/ に settings.json と hooks を配置します
 
 $ErrorActionPreference = "Stop"
