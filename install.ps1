@@ -22,5 +22,8 @@ if (-not (Test-Path $localInstall)) {
     exit 1
 }
 
+# Set $scriptDir for copy_local.ps1 (it cannot get its own path when run via Invoke-Expression)
+$scriptDir = $tempDir
+
 # Run file content inline to avoid execution policy issues
 Get-Content $localInstall -Raw | Invoke-Expression
