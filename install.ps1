@@ -1,4 +1,4 @@
-# Claude Code 権限設定インストールスクリプト
+﻿# Claude Code 権限設定インストールスクリプト
 # GitHub からソースを取得して ~/.claude/ にインストールします
 
 $ErrorActionPreference = "Stop"
@@ -22,4 +22,5 @@ if (-not (Test-Path $localInstall)) {
     exit 1
 }
 
-& $localInstall
+# 実行ポリシーに依存しないよう、ファイル内容をインライン実行
+Get-Content $localInstall -Raw | Invoke-Expression
