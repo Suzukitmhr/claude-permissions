@@ -3,11 +3,7 @@
 
 $ErrorActionPreference = "Stop"
 
-# When run via Invoke-Expression, $MyInvocation.MyCommand.Path is null.
-# In that case, $scriptDir is already set by the caller (install.ps1).
-if (-not $scriptDir) {
-    $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-}
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $claudeDir = Join-Path $HOME ".claude"
 $hooksDir = Join-Path $claudeDir "hooks"
 $backupDir = Join-Path $claudeDir "backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
