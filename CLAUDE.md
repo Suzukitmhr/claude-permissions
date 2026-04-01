@@ -16,6 +16,7 @@
 - **hooks/** — ツール実行前に動作するNode.jsフックスクリプト:
   - `block-sensitive-files.js` — `.env`、`appsettings.{Staging|Production|Development}.json`、SSH鍵（`id_rsa`、`id_ed25519`）への `Read` アクセスをブロック。stdinからJSON形式でツール入力を読み取り、終了コード2でブロックを通知。
   - `block-sensitive-bash.js` — 機密ファイルを参照する `Bash` コマンドをブロック（同じパターン）。同じstdin JSON / 終了コード2の規約。
+  - `notify.js` — 確認待ち（`Notification`）・実行完了（`Stop`）をデスクトップ通知またはSlackで通知。優先順位: `CLAUDE_CODE_SLACK_BOT_TOKEN`（Bot API）→ `CLAUDE_CODE_SLACK_WEBHOOK_URL`（Webhook）→ Windowsバルーン。終了コードは常に0。
 
 ## フックの規約
 
