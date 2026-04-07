@@ -24,10 +24,34 @@
 
 ## ブロック対象ファイルの追加
 
-ユーザから読み込み対象外にしたいファイルパターンを指示された場合、以下の3ファイルすべてを更新すること:
+ユーザから読み込み対象外にしたいファイルパターンを指示された場合、以下の**2箇所**を更新すること:
 
-1. **settings.json** — `permissions.deny` 配列に `Read(パターン)` を追加
-2. **hooks/block-sensitive-files.js** — `blockedPatterns` 配列に対応する正規表現を追加
-3. **hooks/block-sensitive-bash.js** — `blockedPatterns` 配列に対応する正規表現を追加
+### 1. hooks/patterns.js（主要定義）
 
-3ファイルのブロックパターンは常に同期を保つこと。
+`SENSITIVE_FILE_RULES` 配列に1エントリを追加する:
+
+```js
+{ label: 'ファイル名パターン',
+  filePattern: /対応する正規表現$/,      // ファイルパス末尾一致
+  bashPattern: /対応する正規表現(\s|$)/ }, // Bashコマンド部分一致
+```
+
+- `filePattern` はパス末尾を `$` でアンカーする
+- `bashPattern` はコマンド文字列中の出現をマッチするため `$` を省略するか `(\s|$)` を付ける
+
+### 2. settings.json（二次防衛層）
+
+`permissions.deny` 配列に対応する glob エントリを追加する（通常4行）:
+
+```json
+"Read(ファイル名)",
+"Read(**/ファイル名)",
+"Write(ファイル名)",
+"Write(**/ファイル名)"
+```
+
+### アーキテクチャ上の注意
+
+フック（patterns.js）と settings.json の deny ルールは**独立した多層防衛**として機能している。
+どちらか一方だけを更新した場合でも片方のレイヤーは有効だが、パターンの一貫性のために両方を更新すること。
+block-sensitive-files.js と block-sensitive-bash.js は patterns.js を require するだけで、直接パターンを定義しない。

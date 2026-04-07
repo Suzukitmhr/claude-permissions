@@ -16,17 +16,32 @@ try {
 
 // ── event type ────────────────────────────────────────────────────────────
 // Notification event: has 'message' field
-// Stop event: has 'stop_hook_active' field
+// Stop event: has 'last_assistant_message' field
 let title, message;
 if (typeof input.message === 'string') {
-  title = 'Claude Code: 確認が必要です';
+  // Notification event — choose title based on notification_type
+  const notificationType = input.notification_type;
+  if (notificationType === 'permission_prompt') {
+    title = 'Claude Code: 権限の確認が必要です';
+  } else if (notificationType === 'idle_prompt') {
+    title = 'Claude Code: 入力を待っています';
+  } else {
+    title = 'Claude Code: 確認が必要です';
+  }
   message = input.message;
 } else {
-  title = 'Claude Code';
-  message = '実行が完了しました';
+  // Stop event — include Claude's summary if available
+  title = 'Claude Code: 完了';
+  const summary = input.last_assistant_message;
+  if (summary) {
+    message = summary.length > 300 ? summary.slice(0, 300) + '…' : summary;
+  } else {
+    message = '実行が完了しました';
+  }
 }
 
 const sessionId = input.session_id || null;
+const cwd = input.cwd || null;
 
 // ── Slack Bot helpers (ported from notify.ps1) ────────────────────────────
 function slackRequest(apiPath, body, token) {
@@ -91,11 +106,19 @@ async function notifyViaBot(token, defaultChannel) {
     { type: 'header', text: { type: 'plain_text', text: title, emoji: true } },
     { type: 'section', text: { type: 'mrkdwn', text: message } },
   ];
+  // Context block: session ID, cwd, notification type
+  const contextElements = [];
   if (sessionId) {
-    blocks.push({
-      type: 'section',
-      fields: [{ type: 'mrkdwn', text: `*Session:*\n${sessionId}` }],
-    });
+    contextElements.push({ type: 'mrkdwn', text: `*Session:* ${sessionId}` });
+  }
+  if (cwd) {
+    contextElements.push({ type: 'mrkdwn', text: `*Dir:* ${cwd}` });
+  }
+  if (input.notification_type) {
+    contextElements.push({ type: 'mrkdwn', text: `*Type:* ${input.notification_type}` });
+  }
+  if (contextElements.length > 0) {
+    blocks.push({ type: 'context', elements: contextElements });
   }
 
   const resp = await slackRequest(
@@ -120,7 +143,10 @@ async function notifyViaBot(token, defaultChannel) {
 }
 
 async function notifyViaWebhook(webhookUrl) {
-  const body = JSON.stringify({ text: `*${title}*\n${message}` });
+  const lines = [`*${title}*`, message];
+  if (cwd) lines.push(`_Dir: ${cwd}_`);
+  if (sessionId) lines.push(`_Session: ${sessionId}_`);
+  const body = JSON.stringify({ text: lines.join('\n') });
   const url = new URL(webhookUrl);
   await new Promise((resolve) => {
     const req = https.request(

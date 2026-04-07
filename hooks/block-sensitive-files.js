@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { fileBlockPatterns } = require('./patterns');
 
 let input;
 try {
@@ -14,31 +15,7 @@ try {
 
 const filePath = input?.tool_input?.path || '';
 
-const blockedPatterns = [
-  /\.env$/,
-  /\.env\./,
-  /appsettings\.json$/,
-  /appsettings\..+\.json$/,
-  /ssc-connections\.json$/,
-  /ssc-connections\..+\.json$/,
-  /id_rsa$/,
-  /id_ed25519$/,
-  // AWS認証情報
-  /[\/\\]\.aws[\/\\]credentials$/,
-  /[\/\\]\.aws[\/\\]config$/,
-  // 秘密鍵・証明書
-  /\.pem$/,
-  /\.key$/,
-  /\.pfx$/,
-  /\.p12$/,
-  // Dockerシークレット
-  /docker-compose\.yml$/,
-  /docker-compose\..+\.yml$/,
-  // 設定ファイル
-  /config\.xml$/,
-];
-
-const isBlocked = blockedPatterns.some(pattern => pattern.test(filePath));
+const isBlocked = fileBlockPatterns.some(pattern => pattern.test(filePath));
 
 if (isBlocked) {
   console.error(`BLOCKED: ${filePath} は読み込みが禁止されています`);
