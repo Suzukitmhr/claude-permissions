@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.codex/hooks/block-sensitive-bash.js\"",
+            "statusMessage": "Checking Bash command"
+          }
+        ]
+      }
+    ]
+  }
+}

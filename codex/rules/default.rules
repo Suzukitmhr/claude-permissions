@@ -1,0 +1,86 @@
+# Block destructive or exfiltration-prone commands outside the sandbox.
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "forbidden",
+    justification = "Use a manual review flow before pushing changes.",
+    match = [
+        "git push",
+        "git push origin main",
+    ],
+    not_match = [
+        "git pull",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "reset"],
+    decision = "forbidden",
+    justification = "Avoid rewriting or discarding history from Codex.",
+    match = [
+        "git reset --hard HEAD~1",
+    ],
+    not_match = [
+        "git status",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "rebase"],
+    decision = "forbidden",
+    justification = "Avoid history rewrites from Codex.",
+    match = [
+        "git rebase main",
+    ],
+    not_match = [
+        "git branch",
+    ],
+)
+
+prefix_rule(
+    pattern = ["sudo"],
+    decision = "forbidden",
+    justification = "Run privileged commands manually outside Codex.",
+    match = [
+        "sudo systemctl restart nginx",
+    ],
+    not_match = [
+        "systemctl status nginx",
+    ],
+)
+
+prefix_rule(
+    pattern = ["curl"],
+    decision = "forbidden",
+    justification = "Use reviewed integrations or ask for explicit approval before network fetches.",
+    match = [
+        "curl https://example.com",
+    ],
+    not_match = [
+        "curlish-tool list",
+    ],
+)
+
+prefix_rule(
+    pattern = ["wget"],
+    decision = "forbidden",
+    justification = "Use reviewed integrations or ask for explicit approval before network fetches.",
+    match = [
+        "wget https://example.com/file.txt",
+    ],
+    not_match = [
+        "wgetter status",
+    ],
+)
+
+prefix_rule(
+    pattern = ["rm", "-rf"],
+    decision = "forbidden",
+    justification = "Do not perform recursive forced deletes from Codex.",
+    match = [
+        "rm -rf build",
+    ],
+    not_match = [
+        "rm -f build.log",
+    ],
+)
