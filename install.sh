@@ -49,6 +49,30 @@ fi
 cp "$SOURCE_SETTINGS" "$CLAUDE_DIR/settings.json"
 echo "[Install] settings.json -> $CLAUDE_DIR"
 
+# Select permission profile and merge extra allow rules
+# Priority: $CLAUDE_PERMISSIONS_PROFILE -> interactive prompt -> "standard"
+PROFILE="$CLAUDE_PERMISSIONS_PROFILE"
+if [ -z "$PROFILE" ]; then
+  if [ -r /dev/tty ]; then
+    echo ""
+    echo "Select permission profile:"
+    echo "  [1] standard (default) - read-only Bash + file editing"
+    echo "  [2] full               - standard + local git ops + dev tools (node/npm/dotnet)"
+    printf "Enter 1 or 2 (default: 1): "
+    read -r CHOICE < /dev/tty || CHOICE=""
+    if [ "$CHOICE" = "2" ]; then PROFILE="full"; else PROFILE="standard"; fi
+  else
+    PROFILE="standard"
+  fi
+fi
+
+APPLY_PROFILE="$SCRIPT_DIR/apply-profile.js"
+if [ -f "$APPLY_PROFILE" ]; then
+  node "$APPLY_PROFILE" "$PROFILE"
+else
+  echo "[Skip] apply-profile.js not found: $APPLY_PROFILE"
+fi
+
 # Copy hooks
 if [ -d "$SOURCE_HOOKS_DIR" ]; then
   mkdir -p "$HOOKS_DIR"

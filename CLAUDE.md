@@ -12,7 +12,10 @@
   - 環境変数（Bedrockモード、AWSリージョン `ap-northeast-1`）
   - `Read` と `Bash` ツール呼び出しに対するPreToolUseフック
   - 権限のallow/denyルール（機密ファイルアクセス、破壊的なgitコマンド、外部ネットワークツールをブロック）
+  - `allow` は **standard** プロファイル相当（`Read`/`Edit`/`Write` ＋ 読み取り系Bash）。`deny` の安全網はここに一元管理する
   - モデルデフォルト設定（opus、常時思考モード有効）
+- **profiles/full.json** — standardに上乗せする `permissions.allow` 差分のみを持つ（ローカルgit操作・開発ツール）。`deny` は持たない
+- **apply-profile.js** — インストール時に呼ばれ、選択プロファイルの `allow` をインストール済み `~/.claude/settings.json` にマージする。standardは追記なし、fullは `profiles/full.json` の `allow` を重複除去してマージ。`deny` は一切変更しない。プロファイル決定は 引数 → `CLAUDE_PERMISSIONS_PROFILE` → 既定 `standard` の順
 - **hooks/** — ツール実行前に動作するNode.jsフックスクリプト:
   - `block-sensitive-files.js` — `.env`、`appsettings.{Staging|Production|Development}.json`、SSH鍵（`id_rsa`、`id_ed25519`）への `Read` アクセスをブロック。stdinからJSON形式でツール入力を読み取り、終了コード2でブロックを通知。
   - `block-sensitive-bash.js` — 機密ファイルを参照する `Bash` コマンドをブロック（同じパターン）。同じstdin JSON / 終了コード2の規約。
@@ -41,14 +44,20 @@
 
 ### 2. settings.json（二次防衛層）
 
-`permissions.deny` 配列に対応する glob エントリを追加する（通常4行）:
+`permissions.deny` 配列に対応する glob エントリを追加する。
+`allow` で `Edit(**)` / `Write(**)` を広く許可しているため、`Read` だけでなく `Write` と `Edit` の deny も必ず追加すること（通常6行）:
 
 ```json
 "Read(ファイル名)",
 "Read(**/ファイル名)",
 "Write(ファイル名)",
-"Write(**/ファイル名)"
+"Write(**/ファイル名)",
+"Edit(ファイル名)",
+"Edit(**/ファイル名)"
 ```
+
+> フックは `Read` と `Bash` にしか掛からない（`Edit`/`Write` 用のフックは無い）。
+> そのため書き込み系の防衛は settings.json の `deny` が唯一の層であり、`Edit` deny の追加は必須。
 
 ### アーキテクチャ上の注意
 

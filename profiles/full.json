@@ -1,0 +1,38 @@
+{
+  "description": "standard プロファイルに、ローカル git 操作と開発ツール（node/npm/dotnet 等）の自動許可を上乗せする差分。破壊的コマンド（push/reset/rebase/sudo/rm -rf/curl/wget）と機密ファイルは settings.json の deny で引き続きブロックされる。",
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(git tag:*)",
+      "Bash(git clean -n:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git worktree:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(yarn:*)",
+      "Bash(pnpm:*)",
+      "Bash(pnpx:*)",
+      "Bash(dotnet:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(pytest:*)",
+      "Bash(go:*)",
+      "Bash(cargo:*)",
+      "Bash(make:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)"
+    ]
+  }
+}

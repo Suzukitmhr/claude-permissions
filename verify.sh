@@ -67,6 +67,14 @@ grep -q 'docker-compose' "$SETTINGS" \
   && check "docker-compose is blocked" "ok" \
   || check "docker-compose is blocked" "fail"
 
+grep -q '"Edit(\*\*/\.env)"' "$SETTINGS" \
+  && check "Edit of .env is blocked" "ok" \
+  || check "Edit of .env is blocked" "fail"
+
+grep -q '"Bash(git status:\*)"' "$SETTINGS" \
+  && check "read-only Bash is allowed (standard profile)" "ok" \
+  || check "read-only Bash is allowed (standard profile)" "fail"
+
 echo ""
 echo "=== Hook test ==="
 

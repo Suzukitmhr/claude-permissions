@@ -51,6 +51,29 @@ if (-not $backupCreated) {
 Copy-Item $sourceSettings (Join-Path $claudeDir "settings.json") -Force
 Write-Host "[Install] settings.json -> $claudeDir"
 
+# Select permission profile and merge extra allow rules
+# Priority: $env:CLAUDE_PERMISSIONS_PROFILE -> interactive prompt -> "standard"
+$profile = $env:CLAUDE_PERMISSIONS_PROFILE
+if (-not $profile) {
+    if ([Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
+        Write-Host ""
+        Write-Host "Select permission profile:" -ForegroundColor Cyan
+        Write-Host "  [1] standard (default) - read-only Bash + file editing"
+        Write-Host "  [2] full               - standard + local git ops + dev tools (node/npm/dotnet)"
+        $choice = Read-Host "Enter 1 or 2 (default: 1)"
+        if ($choice -eq "2") { $profile = "full" } else { $profile = "standard" }
+    } else {
+        $profile = "standard"
+    }
+}
+
+$applyProfile = Join-Path $scriptDir "apply-profile.js"
+if (Test-Path $applyProfile) {
+    node $applyProfile $profile
+} else {
+    Write-Host "[Skip] apply-profile.js not found: $applyProfile"
+}
+
 # Copy hooks
 if (Test-Path $sourceHooksDir) {
     if (-not (Test-Path $hooksDir)) {

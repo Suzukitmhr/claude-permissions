@@ -74,7 +74,9 @@ cd claude-permissions/codex
 
 ## 機能
 
-- `settings.json` — Claude Code の設定（モデル、環境変数、権限ルール）
+- `settings.json` — Claude Code の設定（モデル、環境変数、権限ルール）。`allow` は **standard** プロファイル相当
+- `profiles/full.json` — standard に上乗せする allow 差分（ローカル git 操作・開発ツール）
+- `apply-profile.js` — インストール時に選択プロファイルの allow を `settings.json` にマージ
 - `hooks/` — Claude Code のセキュリティチェックと通知
 - `codex/config.toml.template` — Codex CLI の既定設定テンプレート
 - `codex/AGENTS.md` — Codex CLI のグローバル既定ガイド
@@ -82,6 +84,44 @@ cd claude-permissions/codex
 - `codex/hooks/` — Codex CLI の Bash セキュリティフックと通知スクリプト
 - `codex/rules/default.rules` — Codex CLI の sandbox 外コマンド抑止ルール
 - `codex/install.*` / `codex/verify.*` — Codex CLI 用のインストール・検証スクリプト
+
+## 権限プロファイル
+
+Claude Code のインストール時に、自動許可（`allow`）の範囲を 2 つのプロファイルから選べます。
+どちらを選んでも、`deny` 側の安全網（機密ファイル・破壊的コマンド・外部ネットワークツールのブロック）は変わりません。
+
+| プロファイル | 自動許可される内容 |
+|--------------|--------------------|
+| **standard**（既定） | `Read` / `Edit` / `Write`（機密ファイルは deny で除外）＋ 読み取り系 Bash（`git status`/`diff`/`log`/`show`/`branch`、`ls`/`cat`/`grep`/`find`/`head`/`tail` など状態を変えないコマンド） |
+| **full** | standard ＋ ローカル git 操作（`add`/`commit`/`checkout`/`switch`/`stash`/`fetch`/`pull`/`merge`/`tag` など）＋ 開発ツール（`node`/`npm`/`npx`/`yarn`/`pnpm`/`dotnet`/`python`/`go`/`cargo`/`make` など） |
+
+`git push` / `git reset` / `git rebase` / `sudo` / `rm -rf` / `curl` / `wget` は full でも `deny` のままブロックされます。
+
+### プロファイルの選択方法
+
+インストーラはこの優先順位でプロファイルを決定します。
+
+1. 環境変数 `CLAUDE_PERMISSIONS_PROFILE`（`standard` または `full`）
+2. 対話プロンプト（端末が対話可能な場合に表示）
+3. 既定値 `standard`（ワンライナーなど非対話時）
+
+環境変数で明示する例：
+
+```powershell
+$env:CLAUDE_PERMISSIONS_PROFILE = 'full'; irm https://github.com/Suzukitmhr/claude-permissions/raw/main/install.ps1 | iex
+```
+
+```bash
+CLAUDE_PERMISSIONS_PROFILE=full bash -c "$(curl -fsSL https://raw.githubusercontent.com/Suzukitmhr/claude-permissions/main/install.sh)"
+```
+
+インストール後にプロファイルを切り替えるには、`apply-profile.js` を直接実行します（クローン済みディレクトリ内で）。
+
+```bash
+node apply-profile.js full      # full の allow を ~/.claude/settings.json にマージ
+```
+
+> standard へ戻す場合は `install` を再実行して `settings.json` を上書きしてください（`apply-profile.js standard` は何も追加しません）。
 
 ## Codex CLI の方針
 
