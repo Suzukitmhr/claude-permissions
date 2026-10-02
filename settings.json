@@ -1,13 +1,16 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "env": {
     "CLAUDE_CODE_USE_BEDROCK": "1",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "jp.anthropic.claude-sonnet-4-6",
+    "CLAUDE_CODE_SUBAGENT_MODEL":"global.anthropic.claude-sonnet-5.5",
     "AWS_DEFAULT_REGION": "ap-northeast-1",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "jp.anthropic.claude-opus-4-8",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "global.anthropic.claude-sonnet-5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "jp.anthropic.claude-opus-5-5",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "global.anthropic.claude-sonnet-5.5",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "jp.anthropic.claude-haiku-4-5-20251001-v1:0"
   },
+  "model": "sonnet",
+  "alwaysThinkingEnabled": false,
+  "autoUpdatesChannel": "latest",
   "hooks": {
     "SessionStart": [
       {
@@ -192,8 +195,5 @@
       "Edit(config.xml)",
       "Edit(**/config.xml)"
     ]
-  },
-  "model": "sonnet",
-  "alwaysThinkingEnabled": true,
-  "autoUpdatesChannel": "latest"
+  }
 }
