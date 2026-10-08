@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.2.1",
   "env": {
     "CLAUDE_CODE_USE_BEDROCK": "1",
     "CLAUDE_CODE_SUBAGENT_MODEL":"global.anthropic.claude-sonnet-5-5",
