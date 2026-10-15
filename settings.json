@@ -68,7 +68,6 @@
     "allow": [
       "Read(**)",
       "Edit(**)",
-      "Write(**)",
       "Bash(ls:*)",
       "Bash(pwd)",
       "Bash(cd:*)",
