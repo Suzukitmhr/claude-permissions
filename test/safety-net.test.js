@@ -10,7 +10,7 @@
  * allow を増やすたびに壊しうる以下の不変条件を守る:
  *  - 破壊的/外部コマンドは deny に在り続ける
  *  - full プロファイルをマージしても、それらが allow に漏れない
- *  - 機密ファイルは Read/Write/Edit の3系統すべてで deny される
+ *  - 機密ファイルは Read/Edit の2系統で deny される（Edit は Write も含む）
  *
  * 実行: node --test  (または npm test)
  */
@@ -51,7 +51,9 @@ const APP = 'appsettings' + dot + 'json';
 const DESTRUCTIVE_COMMANDS = [
   'Bash(sudo:*)',
   'Bash(rm -rf:*)',
-  'Bash(git push:*)',
+  'Bash(git push --force:*)',
+  'Bash(git push -f:*)',
+  'Bash(git push --force-with-lease:*)',
   'Bash(git reset:*)',
   'Bash(git rebase:*)',
   'Bash(curl:*)',
@@ -71,7 +73,14 @@ test('full マージ後も破壊的コマンドが allow に漏れない', () =>
   }
 });
 
-test('機密ファイルは Read/Write/Edit の3系統すべてで deny される', () => {
+test('git push は ask（毎回確認）で、allow には無い（full マージ後も）', () => {
+  const PUSH = 'Bash(git push:*)';
+  assert.ok((settings.permissions.ask || []).includes(PUSH), `${PUSH} が ask に無い`);
+  assert.ok(!mergedAllowWithFull().includes(PUSH), `${PUSH} が allow に混入`);
+});
+
+// Edit の deny は Write を含む書き換え系ツール全般に効くため、Write(...) は持たない
+test('機密ファイルは Read/Edit の2系統で deny される', () => {
   const targets = [
     ['**/' + ENV, ENV],
     ['**/' + RSA, 'SSH private key'],
@@ -79,7 +88,7 @@ test('機密ファイルは Read/Write/Edit の3系統すべてで deny され�
     ['**/' + APP, 'appsettings'],
   ];
   for (const [pattern, label] of targets) {
-    for (const verb of ['Read', 'Write', 'Edit']) {
+    for (const verb of ['Read', 'Edit']) {
       const rule = `${verb}(${pattern})`;
       assert.ok(deny.includes(rule), `${rule} (${label}) が deny に無い`);
     }

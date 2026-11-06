@@ -73,6 +73,37 @@ else
   echo "[Skip] apply-profile.js not found: $APPLY_PROFILE"
 fi
 
+# Select provider: Bedrock (default) or Claude Team plan
+# Priority: $CLAUDE_PERMISSIONS_PROVIDER -> interactive prompt -> "bedrock"
+PROVIDER="$CLAUDE_PERMISSIONS_PROVIDER"
+if [ -z "$PROVIDER" ]; then
+  if [ -r /dev/tty ]; then
+    echo ""
+    echo "Select provider:"
+    echo "  [1] bedrock (default) - AWS Bedrock"
+    echo "  [2] team              - Claude Team plan"
+    printf "Enter 1 or 2 (default: 1): "
+    read -r CHOICE < /dev/tty || CHOICE=""
+    if [ "$CHOICE" = "2" ]; then PROVIDER="team"; else PROVIDER="bedrock"; fi
+  else
+    PROVIDER="bedrock"
+  fi
+fi
+
+APPLY_PROVIDER="$SCRIPT_DIR/apply-provider.js"
+if [ -f "$APPLY_PROVIDER" ]; then
+  node "$APPLY_PROVIDER" "$PROVIDER"
+else
+  echo "[Skip] apply-provider.js not found: $APPLY_PROVIDER"
+fi
+
+# Copy provider files (for ad-hoc switching: claude --settings ~/.claude/providers/<name>.json)
+if [ -d "$SCRIPT_DIR/providers" ]; then
+  mkdir -p "$CLAUDE_DIR/providers"
+  cp -r "$SCRIPT_DIR/providers"/. "$CLAUDE_DIR/providers/"
+  echo "[Install] providers/ -> $CLAUDE_DIR/providers"
+fi
+
 # Copy hooks
 if [ -d "$SOURCE_HOOKS_DIR" ]; then
   mkdir -p "$HOOKS_DIR"

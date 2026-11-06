@@ -44,8 +44,8 @@ echo "=== settings.json check ==="
 SETTINGS="$CLAUDE_DIR/settings.json"
 
 grep -q '"CLAUDE_CODE_USE_BEDROCK"' "$SETTINGS" \
-  && check "Bedrock mode is set" "ok" \
-  || check "Bedrock mode is set" "fail"
+  && echo "  [INFO] Provider: Bedrock" \
+  || echo "  [INFO] Provider: Team"
 
 grep -q '"PreToolUse"' "$SETTINGS" \
   && check "PreToolUse hooks are set" "ok" \

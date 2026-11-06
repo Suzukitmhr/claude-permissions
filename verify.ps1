@@ -52,7 +52,7 @@ Write-Host ""
 Write-Host "=== settings.json check ==="
 
 $settings = Get-Content $settingsPath -Raw
-Check "Bedrock mode is set"           ($settings -match "CLAUDE_CODE_USE_BEDROCK")
+Write-Host ("  [INFO] Provider: " + $(if ($settings -match "CLAUDE_CODE_USE_BEDROCK") { "Bedrock" } else { "Team" }))
 Check "PreToolUse hooks are set"      ($settings -match "PreToolUse")
 Check "sudo is blocked"               ($settings -match "Bash\(sudo")
 Check "AWS credentials are blocked"   ($settings -match "\.aws")

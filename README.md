@@ -77,6 +77,7 @@ cd claude-permissions/codex
 - `settings.json` — Claude Code の設定（モデル、環境変数、権限ルール）。`allow` は **standard** プロファイル相当
 - `profiles/full.json` — standard に上乗せする allow 差分（ローカル git 操作・開発ツール）
 - `apply-profile.js` — インストール時に選択プロファイルの allow を `settings.json` にマージ
+- `apply-provider.js` — インストール時に選択した接続先（Bedrock / Team）を `settings.json` に反映
 - `hooks/` — Claude Code のセキュリティチェックと通知
 - `codex/config.toml.template` — Codex CLI の既定設定テンプレート
 - `codex/AGENTS.md` — Codex CLI のグローバル既定ガイド
@@ -84,6 +85,28 @@ cd claude-permissions/codex
 - `codex/hooks/` — Codex CLI の Bash セキュリティフックと通知スクリプト
 - `codex/rules/default.rules` — Codex CLI の sandbox 外コマンド抑止ルール
 - `codex/install.*` / `codex/verify.*` — Codex CLI 用のインストール・検証スクリプト
+
+## 接続先（Bedrock / Team）
+
+インストール時に接続先を選べます（既定は **bedrock**）。
+
+| 接続先 | 内容 |
+|--------|------|
+| **bedrock**（既定） | `providers/bedrock.json` の `env`（Bedrock モード・リージョン・モデルID）を `settings.json` に反映する。AWS 従量課金 |
+| **team** | `env` なし（Claude Team プラン・Anthropic 直接接続）。ステータスラインに `Team` と表示 |
+
+決定の優先順位は 環境変数 `CLAUDE_PERMISSIONS_PROVIDER`（`team` / `bedrock`）→ 対話プロンプト → 既定 `bedrock` です。
+
+### 一時的な切り替え
+
+両方の設定ファイルが `~/.claude/providers/` に配布されます。起動時に `--settings` で指定すると、その起動だけ接続先を切り替えられます（`settings.json` は変更されません）。
+
+```bash
+claude --settings ~/.claude/providers/team.json      # Team で起動
+claude --settings ~/.claude/providers/bedrock.json   # Bedrock で起動
+```
+
+> 起動後に `/status` で接続先を確認してください。`team.json` は Bedrock の `env` を空文字/`0` で打ち消す方式で、実機での動作確認が必要です。
 
 ## 権限プロファイル
 
@@ -95,7 +118,8 @@ Claude Code のインストール時に、自動許可（`allow`）の範囲を 
 | **standard**（既定） | `Read` / `Edit` / `Write`（機密ファイルは deny で除外）＋ 読み取り系 Bash（`git status`/`diff`/`log`/`show`/`branch`、`ls`/`cat`/`grep`/`find`/`head`/`tail` など状態を変えないコマンド） |
 | **full** | standard ＋ ローカル git 操作（`add`/`commit`/`checkout`/`switch`/`stash`/`fetch`/`pull`/`merge`/`tag` など）＋ 開発ツール（`node`/`npm`/`npx`/`yarn`/`pnpm`/`dotnet`/`python`/`go`/`cargo`/`make` など） |
 
-`git push` / `git reset` / `git rebase` / `sudo` / `rm -rf` / `curl` / `wget` は full でも `deny` のままブロックされます。
+`git push --force`（`-f` / `--force-with-lease` 含む）/ `git reset` / `git rebase` / `sudo` / `rm -rf` / `curl` / `wget` は full でも `deny` のままブロックされます。
+通常の `git push` は `ask` で、Claude が実行するたびに承認ダイアログが出ます。
 
 ### プロファイルの選択方法
 
