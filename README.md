@@ -106,6 +106,13 @@ claude --settings ~/.claude/providers/team.json      # Team で起動
 claude --settings ~/.claude/providers/bedrock.json   # Bedrock で起動
 ```
 
+PowerShell では `~` が展開されないことがあるため、`$HOME` を使います。
+
+```powershell
+claude --settings "$HOME\.claude\providers\team.json"      # Team で起動
+claude --settings "$HOME\.claude\providers\bedrock.json"   # Bedrock で起動
+```
+
 > 起動後に `/status` で接続先を確認してください。`team.json` は Bedrock の `env` を空文字/`0` で打ち消す方式で、実機での動作確認が必要です。
 
 ## 権限プロファイル
