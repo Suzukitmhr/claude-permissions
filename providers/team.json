@@ -1,0 +1,14 @@
+{
+  "env": {
+    "CLAUDE_CODE_USE_BEDROCK": "0",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "",
+    "ANTHROPIC_MODEL": ""
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node \"$HOME/.claude/hooks/statusline.js\" team"
+  }
+}

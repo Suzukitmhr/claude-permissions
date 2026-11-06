@@ -74,6 +74,38 @@ if (Test-Path $applyProfile) {
     Write-Host "[Skip] apply-profile.js not found: $applyProfile"
 }
 
+# Select provider: Bedrock (default) or Claude Team plan
+# Priority: $env:CLAUDE_PERMISSIONS_PROVIDER -> interactive prompt -> "bedrock"
+$provider = $env:CLAUDE_PERMISSIONS_PROVIDER
+if (-not $provider) {
+    if ([Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
+        Write-Host ""
+        Write-Host "Select provider:" -ForegroundColor Cyan
+        Write-Host "  [1] bedrock (default) - AWS Bedrock"
+        Write-Host "  [2] team              - Claude Team plan"
+        $choice = Read-Host "Enter 1 or 2 (default: 1)"
+        if ($choice -eq "2") { $provider = "team" } else { $provider = "bedrock" }
+    } else {
+        $provider = "bedrock"
+    }
+}
+
+$applyProvider = Join-Path $scriptDir "apply-provider.js"
+if (Test-Path $applyProvider) {
+    node $applyProvider $provider
+} else {
+    Write-Host "[Skip] apply-provider.js not found: $applyProvider"
+}
+
+# Copy provider files (for ad-hoc switching: claude --settings ~/.claude/providers/<name>.json)
+$sourceProviders = Join-Path $scriptDir "providers"
+if (Test-Path $sourceProviders) {
+    $destProviders = Join-Path $claudeDir "providers"
+    New-Item -ItemType Directory -Path $destProviders -Force | Out-Null
+    Copy-Item (Join-Path $sourceProviders "*") $destProviders -Force
+    Write-Host "[Install] providers/ -> $destProviders"
+}
+
 # Copy hooks
 if (Test-Path $sourceHooksDir) {
     if (-not (Test-Path $hooksDir)) {
