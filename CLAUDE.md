@@ -23,7 +23,8 @@
   - 権限のallow/denyルール（機密ファイルアクセス、破壊的なgitコマンド、外部ネットワークツールをブロック）
   - `allow` は **standard** プロファイル相当（`Read`/`Edit`/`Write` ＋ 読み取り系Bash）。`deny` の安全網はここに一元管理する
   - `ask`（毎回確認）に `git push` を置く。force push は `deny`。main への直 push は GitHub のブランチ保護で防ぐ（権限ルールは前方一致のため最終防衛にしない）
-  - モデルデフォルト設定（opus、常時思考モード有効）
+  - モデルデフォルト設定（sonnet、常時思考モード無効）
+  - Claude が自分の制限を緩められないよう、`~/.claude/settings.json` と `~/.claude/hooks/**` の `Edit` を deny する
 - **profiles/full.json** — standardに上乗せする `permissions.allow` 差分のみを持つ（ローカルgit操作・開発ツール）。`deny` は持たない
 - **apply-profile.js** — インストール時に呼ばれ、選択プロファイルの `allow` をインストール済み `~/.claude/settings.json` にマージする。standardは追記なし、fullは `profiles/full.json` の `allow` を重複除去してマージ。`deny` は一切変更しない。プロファイル決定は 引数 → `CLAUDE_PERMISSIONS_PROFILE` → 既定 `standard` の順
 - **providers/bedrock.json・team.json** — 接続先ごとの差分（`claude --settings <file>` で上乗せできる形）。`bedrock.json` が Bedrock の `env`（モード・リージョン・モデルID）を一元管理する。`team.json` は Bedrock の `env` を打ち消す値（`CLAUDE_CODE_USE_BEDROCK=0`、モデル系は空文字）。どちらも `statusLine` を持つ。settings.json の `env` は持たない。`bedrock.json` の env にキーを追加したら `team.json` の打ち消しも追加すること。`~/.claude/providers/` に配布され、各自が `claude --settings ~/.claude/providers/<名前>.json` で一時的に切り替える（切替スクリプトは持たない）

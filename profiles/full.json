@@ -1,5 +1,5 @@
 {
-  "description": "standard プロファイルに、ローカル git 操作と開発ツール（node/npm/dotnet 等）の自動許可を上乗せする差分。破壊的コマンド（push/reset/rebase/sudo/rm -rf/curl/wget）と機密ファイルは settings.json の deny で引き続きブロックされる。",
+  "description": "standard プロファイルに、ローカル git 操作と開発ツール（node/npm/dotnet 等）の自動許可を上乗せする差分。破壊的コマンド（force push/reset/rebase/branch 削除/sed -i/sudo/rm -rf/curl/wget）と機密ファイルは settings.json の deny で引き続きブロックされる。git push は settings.json の ask で毎回確認。",
   "permissions": {
     "allow": [
       "Bash(git add:*)",

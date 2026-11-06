@@ -56,6 +56,8 @@ const DESTRUCTIVE_COMMANDS = [
   'Bash(git push --force-with-lease:*)',
   'Bash(git reset:*)',
   'Bash(git rebase:*)',
+  'Bash(git branch -D:*)',
+  'Bash(sed -i:*)',
   'Bash(curl:*)',
   'Bash(wget:*)',
 ];
@@ -77,6 +79,12 @@ test('git push は ask（毎回確認）で、allow には無い（full マー�
   const PUSH = 'Bash(git push:*)';
   assert.ok((settings.permissions.ask || []).includes(PUSH), `${PUSH} が ask に無い`);
   assert.ok(!mergedAllowWithFull().includes(PUSH), `${PUSH} が allow に混入`);
+});
+
+test('Claude 自身の設定・フックは Edit deny される', () => {
+  for (const rule of ['Edit(~/.claude/settings.json)', 'Edit(~/.claude/hooks/**)']) {
+    assert.ok(deny.includes(rule), `${rule} が deny に無い`);
+  }
 });
 
 // Edit の deny は Write を含む書き換え系ツール全般に効くため、Write(...) は持たない
