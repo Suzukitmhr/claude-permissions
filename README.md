@@ -122,7 +122,7 @@ Claude Code のインストール時に、自動許可（`allow`）の範囲を 
 
 | プロファイル | 自動許可される内容 |
 |--------------|--------------------|
-| **standard**（既定） | `Read` / `Edit` / `Write`（機密ファイルは deny で除外）＋ 読み取り系 Bash（`git status`/`diff`/`log`/`show`/`branch`、`ls`/`cat`/`grep`/`find`/`head`/`tail` など状態を変えないコマンド） |
+| **standard**（既定） | `Read` / `Edit` / `Write`（機密ファイルは deny で除外）＋ 読み取り系 Bash（`git status`/`diff`/`log`/`show`/`branch`、`ls`/`cat`/`grep`/`head`/`tail` など状態を変えないコマンド。`git branch -d/-D`・`sed -i` は deny） |
 | **full** | standard ＋ ローカル git 操作（`add`/`commit`/`checkout`/`switch`/`stash`/`fetch`/`pull`/`merge`/`tag` など）＋ 開発ツール（`node`/`npm`/`npx`/`yarn`/`pnpm`/`dotnet`/`python`/`go`/`cargo`/`make` など） |
 
 `git push --force`（`-f` / `--force-with-lease` 含む）/ `git reset` / `git rebase` / `sudo` / `rm -rf` / `curl` / `wget` は full でも `deny` のままブロックされます。

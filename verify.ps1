@@ -57,7 +57,7 @@ Check "PreToolUse hooks are set"      ($settings -match "PreToolUse")
 Check "sudo is blocked"               ($settings -match "Bash\(sudo")
 Check "AWS credentials are blocked"   ($settings -match "\.aws")
 Check "Private keys are blocked"      ($settings -match "\.pem")
-Check "docker-compose is blocked"     ($settings -match "docker-compose")
+Check "git credentials are blocked"   ($settings -match "git-credentials")
 Check "Edit of .env is blocked"        ($settings -match "Edit\(\*\*/\.env\)")
 Check "read-only Bash is allowed (standard profile)" ($settings -match "Bash\(git status:\*\)")
 

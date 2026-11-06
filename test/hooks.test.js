@@ -48,6 +48,17 @@ test('Bash フック: 機密ファイル参照はブロック(exit 2)', () => {
   assert.equal(runHook(bashHook, { command: 'cat ' + ENV }), 2);
 });
 
+test('Bash フック: 追加した機密ファイルもブロック(exit 2)', () => {
+  for (const name of [dot + 'npmrc', dot + 'netrc', dot + 'git-credentials', 'id_' + 'ecdsa', '~/' + dot + 'kube/config', 'prod' + dot + 'tfvars']) {
+    assert.equal(runHook(bashHook, { command: 'cat ' + name }), 2, name);
+  }
+});
+
+test('Bash フック: 環境変数アクセスは誤検知しない(exit 0)', () => {
+  assert.equal(runHook(bashHook, { command: 'node -e "console.log(process' + ENV + '.HOME)"' }), 0);
+  assert.equal(runHook(bashHook, { command: 'node -e "process' + ENV + '"' }), 0);
+});
+
 test('Bash フック: 読み取り系コマンドは許可(exit 0)', () => {
   assert.equal(runHook(bashHook, { command: 'git status' }), 0);
   assert.equal(runHook(bashHook, { command: 'ls -la' }), 0);

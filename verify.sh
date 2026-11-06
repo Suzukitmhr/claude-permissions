@@ -63,9 +63,9 @@ grep -q '\.pem' "$SETTINGS" \
   && check "Private keys are blocked" "ok" \
   || check "Private keys are blocked" "fail"
 
-grep -q 'docker-compose' "$SETTINGS" \
-  && check "docker-compose is blocked" "ok" \
-  || check "docker-compose is blocked" "fail"
+grep -q 'git-credentials' "$SETTINGS" \
+  && check "git credentials are blocked" "ok" \
+  || check "git credentials are blocked" "fail"
 
 grep -q '"Edit(\*\*/\.env)"' "$SETTINGS" \
   && check "Edit of .env is blocked" "ok" \
