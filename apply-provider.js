@@ -5,8 +5,8 @@
  * インストール済みの ~/.claude/settings.json に、選択した接続先（providers/<名前>.json）を反映する。
  *
  * bedrock: providers/bedrock.json の内容（env・statusLine）をマージする。
- * team:    providers/team.json の statusLine をマージする。
- *          env は反映しない（Team は env 無しが基本。env は --settings で Bedrock から切り替える用）。
+ * team:    statusLine と計測用provider識別子のみをマージする。
+ *          その他の env は --settings で Bedrock から切り替える用。
  *
  * 決定の優先順位: 引数 → 環境変数 CLAUDE_PERMISSIONS_PROVIDER → 既定 "bedrock"
  * 使い方: node apply-provider.js [team|bedrock]
@@ -30,6 +30,7 @@ try {
   const { env, ...rest } = def;
   Object.assign(settings, rest);
   if (provider === 'bedrock') settings.env = { ...settings.env, ...env };
+  else settings.env = { ...settings.env, CLAUDE_USAGE_PROVIDER: env.CLAUDE_USAGE_PROVIDER };
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf8');
 } catch (err) {
   console.error(`[apply-provider] ERROR: ${err.message}`);

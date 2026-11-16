@@ -28,11 +28,12 @@
 - **profiles/full.json** — standardに上乗せする `permissions.allow` 差分のみを持つ（ローカルgit操作・開発ツール）。`deny` は持たない
 - **apply-profile.js** — インストール時に呼ばれ、選択プロファイルの `allow` をインストール済み `~/.claude/settings.json` にマージする。standardは追記なし、fullは `profiles/full.json` の `allow` を重複除去してマージ。`deny` は一切変更しない。プロファイル決定は 引数 → `CLAUDE_PERMISSIONS_PROFILE` → 既定 `standard` の順
 - **providers/bedrock.json・team.json** — 接続先ごとの差分（`claude --settings <file>` で上乗せできる形）。`bedrock.json` が Bedrock の `env`（モード・リージョン・モデルID）を一元管理する。`team.json` は Bedrock の `env` を打ち消す値（`CLAUDE_CODE_USE_BEDROCK=0`、モデル系は空文字）。どちらも `statusLine` を持つ。settings.json の `env` は持たない。`bedrock.json` の env にキーを追加したら `team.json` の打ち消しも追加すること。`~/.claude/providers/` に配布され、各自が `claude --settings ~/.claude/providers/<名前>.json` で一時的に切り替える（切替スクリプトは持たない）
-- **apply-provider.js** — インストール時に呼ばれ、選択した接続先の `providers/<名前>.json` をインストール済み `~/.claude/settings.json` にマージする。bedrock は `env` と `statusLine`、team は `statusLine` のみ（`env` は反映しない）。決定は 引数 → `CLAUDE_PERMISSIONS_PROVIDER` → 既定 `bedrock` の順
+- **apply-provider.js** — インストール時に呼ばれ、選択した接続先の `providers/<名前>.json` をインストール済み `~/.claude/settings.json` にマージする。bedrock は `env` と `statusLine`、team は `statusLine` と `env.CLAUDE_USAGE_PROVIDER` のみを反映する。決定は 引数 → `CLAUDE_PERMISSIONS_PROVIDER` → 既定 `bedrock` の順
 - **hooks/** — ツール実行前に動作するNode.jsフックスクリプト:
   - `block-sensitive-files.js` — `.env`、`appsettings.{Staging|Production|Development}.json`、SSH鍵（`id_rsa`、`id_ed25519`）への `Read` アクセスをブロック。stdinからJSON形式でツール入力を読み取り、終了コード2でブロックを通知。
   - `block-sensitive-bash.js` — 機密ファイルを参照する `Bash` コマンドをブロック（同じパターン）。同じstdin JSON / 終了コード2の規約。
   - `statusline.js` — 引数が `team` のときだけ `Team` と表示し、`bedrock` のときは何も表示しない。`providers/*.json` の `statusLine` から呼ばれる。
+  - `usage.js` — `src/usage*.js` から `npm run build:usage` で生成する配布用バンドル。デフォルトOFF。利用者の `~/.claude/usage.json` とPJの `.claude/usage.json` を参照し、AWS SSO認証で利用イベントを送信する。詳細は `docs/usage-events.md`。生成物を直接編集しない。
   - `notify.js` — 確認待ち（`Notification`）・実行完了（`Stop`）をデスクトップ通知またはSlackで通知。優先順位: `CLAUDE_CODE_SLACK_BOT_TOKEN`（Bot API）→ `CLAUDE_CODE_SLACK_WEBHOOK_URL`（Webhook）→ Windowsバルーン。終了コードは常に0。
 
 ## フックの規約

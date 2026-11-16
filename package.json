@@ -4,6 +4,16 @@
   "private": true,
   "description": "Claude Code の権限設定とセキュリティフック",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "build:usage": "node scripts/build-usage.js"
+  },
+  "dependencies": {
+    "@aws-crypto/sha256-js": "5.2.0",
+    "@aws-sdk/credential-provider-sso": "3.973.28",
+    "@smithy/protocol-http": "5.6.2",
+    "@smithy/signature-v4": "5.7.5"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
   }
 }

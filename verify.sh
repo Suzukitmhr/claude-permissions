@@ -20,6 +20,7 @@ check() {
 }
 
 echo "=== File check ==="
+[ -f "$HOOKS_DIR/usage.js" ] && check "usage.js exists" "ok" || check "usage.js exists" "fail"
 
 [ -f "$CLAUDE_DIR/settings.json" ]           && check "settings.json exists" "ok"           || check "settings.json exists" "fail"
 [ -f "$HOOKS_DIR/block-sensitive-files.js" ]  && check "block-sensitive-files.js exists" "ok" || check "block-sensitive-files.js exists" "fail"
