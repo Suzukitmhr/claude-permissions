@@ -1,5 +1,6 @@
 {
   "env": {
+    "CLAUDE_USAGE_PROVIDER": "team",
     "CLAUDE_CODE_USE_BEDROCK": "0",
     "CLAUDE_CODE_SUBAGENT_MODEL": "",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "",

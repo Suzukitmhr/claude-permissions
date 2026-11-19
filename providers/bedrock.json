@@ -1,5 +1,6 @@
 {
   "env": {
+    "CLAUDE_USAGE_PROVIDER": "bedrock",
     "CLAUDE_CODE_USE_BEDROCK": "1",
     "CLAUDE_CODE_SUBAGENT_MODEL": "global.anthropic.claude-sonnet-5-5",
     "AWS_DEFAULT_REGION": "ap-northeast-1",

@@ -30,6 +30,7 @@ Check "settings.json exists"           (Test-Path $settingsPath)
 Check "block-sensitive-files.js exists" (Test-Path (Join-Path $hooksDir "block-sensitive-files.js"))
 Check "block-sensitive-bash.js exists"  (Test-Path (Join-Path $hooksDir "block-sensitive-bash.js"))
 Check "check-version.js exists"        (Test-Path (Join-Path $hooksDir "check-version.js"))
+Check "usage.js exists"                (Test-Path (Join-Path $hooksDir "usage.js"))
 Check ".install-source exists"         (Test-Path (Join-Path $claudeDir ".install-source"))
 
 # Show version info

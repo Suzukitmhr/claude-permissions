@@ -16,6 +16,10 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Skill",
+        "hooks": [{ "type": "command", "command": "node \"$HOME/.claude/hooks/usage.js\"", "timeout": 6 }]
+      },
+      {
         "matcher": "Read",
         "hooks": [
           {
@@ -32,6 +36,16 @@
             "command": "node \"$HOME/.claude/hooks/block-sensitive-bash.js\""
           }
         ]
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "hooks": [{ "type": "command", "command": "node \"$HOME/.claude/hooks/usage.js\"", "timeout": 6 }]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [{ "type": "command", "command": "node \"$HOME/.claude/hooks/usage.js\"", "timeout": 6 }]
       }
     ],
     "Notification": [
