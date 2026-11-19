@@ -6,6 +6,8 @@ Claude Code と Codex CLI の設定ファイル群を管理しています。
 
 デフォルトOFFです。個人のAWS SSO認証で、スキル／サブエージェント呼出しごとに指定APIへ送信できます。Bedrock・Team共通です。設定・API契約・検証手順は [利用イベント送信](docs/usage-events.md) を参照してください。受信APIは別リポジトリで実装します。
 
+別リポジトリでのAPI作成用に、[機能要件書・受入基準](docs/usage-api-requirements.md)と[実装指示文](docs/usage-api-implementation-prompt.md)をこのリポジトリで管理しています。両方を実装担当へ渡してください。
+
 ## インストール
 
 ### Claude Code

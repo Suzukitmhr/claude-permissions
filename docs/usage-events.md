@@ -57,9 +57,11 @@ OFF時はフック入力を読み取らず、認証情報取得・通信・記�
 
 ## 受信API契約（別リポジトリ）
 
+受信側の詳細な機能要件・受入基準は[受信API機能要件書](usage-api-requirements.md)を正本とします。別リポジトリへの実装依頼には[実装指示文](usage-api-implementation-prompt.md)を、同じ版の要件書と一緒に渡してください。以下は送信側向けの契約概要です。
+
 API Gateway **REST API** の対象POSTメソッドを `AWS_IAM` にし、`execute-api` サービスへのSigV4署名を検証します。利用者のSSO権限セットには対象stage・POST・パスへの `execute-api:Invoke` のみ付与します。IP制限はリソースポリシーで併用し、初版ではCloudFrontは使用しません。
 
-`Content-Type: application/json`、本文は次の8項目だけです。Bearerトークン・自己申告のメンバーIDは使用しません。
+`Content-Type: application/json`、本文は次の7項目だけです。Bearerトークン・自己申告のメンバーIDは使用しません。
 
 ```json
 {
@@ -77,7 +79,7 @@ API Gateway **REST API** の対象POSTメソッドを `AWS_IAM` にし、`execut
 
 受信側は本文の申告ではなく、IAM認証済みの `requestContext.identity` から送信者を確定してください。共通のSSOロール名だけで個人を区別してはいけません。実環境で得られるprincipal・role session情報を確認し、信頼できる個人との対応表を確定するまでは本番集計を開始しません。SSOユーザーIDが自動でこのJSONに入るわけではありません。
 
-成功は任意の2xx（推奨204、本文なし）。同じ `event_id` の再受信は重複保存せず成功を返す契約とします。受信側では許可した認証主体・PJを検証し、レート制限とサイズ上限（例8KiB）を設けます。Authorization・セッショントークン・本文全体をアクセスログやエラーログへ出力しないでください。会話・コード・引数・パス・Git URLは送信項目にありません。
+成功は任意の2xx（推奨204、本文なし）。同じメンバー・`event_id`・本文の再受信は重複保存せず成功を返し、同じIDで内容が異なる場合は409とします。受信側では許可した認証主体・PJを検証し、レート制限とサイズ上限（8KiB）を設けます。Authorization・セッショントークン・本文全体をアクセスログやエラーログへ出力しないでください。会話・コード・引数・パス・Git URLは送信項目にありません。
 
 ## 開発・配布・受入検証
 
