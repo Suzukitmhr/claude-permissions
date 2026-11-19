@@ -92,8 +92,10 @@ cd claude-permissions/codex
 
 | 接続先 | 内容 |
 |--------|------|
-| **bedrock**（既定） | `providers/bedrock.json` の `env`（Bedrock モード・リージョン・モデルID）を `settings.json` に反映する。AWS 従量課金 |
+| **bedrock**（既定） | `providers/bedrock.json` の `env`（Bedrock モード・リージョン・モデルID）を `settings.json` に反映する。AWS 従量課金。ステータスラインに `Bedrock` と表示 |
 | **team** | `env` なし（Claude Team プラン・Anthropic 直接接続）。ステータスラインに `Team` と表示 |
+
+ステータスラインには接続先に続けて、現在のモデルとエフォートも表示します（例: `Team | Opus | high`）。エフォート非対応のモデルではエフォートを省略します。
 
 決定の優先順位は 環境変数 `CLAUDE_PERMISSIONS_PROVIDER`（`team` / `bedrock`）→ 対話プロンプト → 既定 `bedrock` です。
 
