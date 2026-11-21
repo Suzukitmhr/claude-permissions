@@ -64,6 +64,17 @@ echo "[Install] AGENTS.md -> $CODEX_DIR"
 cp "$SOURCE_DIR/hooks.json" "$CODEX_DIR/hooks.json"
 echo "[Install] hooks.json -> $CODEX_DIR"
 
+# Merge personal hooks last, so they survive reinstall (~/.codex/hooks.personal.json)
+# Re-apply after editing the personal file: node ~/.codex/apply-personal.js ~/.codex/hooks.json ~/.codex/hooks.personal.json
+APPLY_PERSONAL="$SOURCE_DIR/../apply-personal.js"
+if [ -f "$APPLY_PERSONAL" ]; then
+  cp "$APPLY_PERSONAL" "$CODEX_DIR/apply-personal.js"
+  node "$APPLY_PERSONAL" "$CODEX_DIR/hooks.json" "$CODEX_DIR/hooks.personal.json" \
+    || echo "[Warn] personal hooks were not applied (see the error above)"
+else
+  echo "[Skip] apply-personal.js not found: $APPLY_PERSONAL"
+fi
+
 cp -r "$SOURCE_DIR/hooks/." "$HOOKS_DIR/"
 chmod +x "$HOOKS_DIR"/*.js 2>/dev/null || true
 echo "[Install] hooks/ -> $HOOKS_DIR"

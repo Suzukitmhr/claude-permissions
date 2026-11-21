@@ -97,6 +97,17 @@ else
   echo "[Skip] apply-provider.js not found: $APPLY_PROVIDER"
 fi
 
+# Merge personal settings last, so they survive reinstall (~/.claude/settings.personal.json)
+# Re-apply after editing the personal file: node ~/.claude/apply-personal.js
+APPLY_PERSONAL="$SCRIPT_DIR/apply-personal.js"
+if [ -f "$APPLY_PERSONAL" ]; then
+  cp "$APPLY_PERSONAL" "$CLAUDE_DIR/apply-personal.js"
+  node "$APPLY_PERSONAL" "$CLAUDE_DIR/settings.json" "$CLAUDE_DIR/settings.personal.json" \
+    || echo "[Warn] personal settings were not applied (see the error above)"
+else
+  echo "[Skip] apply-personal.js not found: $APPLY_PERSONAL"
+fi
+
 # Copy provider files (for ad-hoc switching: claude --settings ~/.claude/providers/<name>.json)
 if [ -d "$SCRIPT_DIR/providers" ]; then
   mkdir -p "$CLAUDE_DIR/providers"
