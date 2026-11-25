@@ -78,6 +78,7 @@ cd claude-permissions/codex
 - `profiles/full.json` — standard に上乗せする allow 差分（ローカル git 操作・開発ツール）
 - `apply-profile.js` — インストール時に選択プロファイルの allow を `settings.json` にマージ
 - `apply-provider.js` — インストール時に選択した接続先（Bedrock / Team）を `settings.json` に反映
+- `apply-personal.js` — インストールの最後に、個人の設定（`settings.personal.json` / `hooks.personal.json`）をマージ
 - `hooks/` — Claude Code のセキュリティチェックと通知
 - `codex/config.toml.template` — Codex CLI の既定設定テンプレート
 - `codex/AGENTS.md` — Codex CLI のグローバル既定ガイド
@@ -116,6 +117,48 @@ claude --settings "$HOME\.claude\providers\bedrock.json"   # Bedrock で起動
 ```
 
 > 起動後に `/status` で接続先を確認してください。`team.json` は Bedrock の `env` を空文字/`0` で打ち消す方式で、実機での動作確認が必要です。
+
+## 個人の設定（上書きされない置き場所）
+
+インストールは `~/.claude/settings.json` と `~/.codex/hooks.json` を配布物で上書きします。個人で足した Hook などは、そのままでは次のインストールで消えます。
+個人の設定は次のファイルに書いてください。インストールの最後に、配布の設定へマージされます。
+
+| 対象 | 個人のファイル | マージ先 |
+|------|----------------|----------|
+| Claude Code | `~/.claude/settings.personal.json` | `~/.claude/settings.json` |
+| Codex CLI | `~/.codex/hooks.personal.json` | `~/.codex/hooks.json` |
+
+例（自分だけ Stop / UserPromptSubmit の Hook を足す）:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "agent-inbox hook stop", "timeout": 30 } ] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "agent-inbox hook prompt", "timeout": 30 } ] }
+    ]
+  }
+}
+```
+
+マージの規則:
+
+- オブジェクトは再帰的にマージし、配列は和集合にします（同じ要素は追加しません）。Hook は配布の Hook（`notify.js` など）に足され、両方動きます
+- 文字列・数値などの値は個人の値で上書きします（`env` の個別のキーなど）
+- 配布側の配列から要素は消えません。配布の `deny`（安全網）は個人の設定では外せません
+- 何度実行しても結果は同じです
+
+個人のファイルを直したら、インストールし直すか、次のコマンドで再適用します。個人のファイルから項目を消したときは、インストールし直してください（再適用だけでは残ります）。
+
+```powershell
+node "$HOME\.claude\apply-personal.js"
+node "$HOME\.codex\apply-personal.js" "$HOME\.codex\hooks.json" "$HOME\.codex\hooks.personal.json"
+```
+
+> `~/.claude/settings.local.json`（ホーム直下）は Claude Code に読まれません。`settings.local.json` が有効なのは、プロジェクトの `.claude/` に置いたときだけです。
+> Codex の `config.toml` は対象外です（個人の設定は `hooks.json` のみ）。
 
 ## 権限プロファイル
 
@@ -165,7 +208,7 @@ node apply-profile.js full      # full の allow を ~/.claude/settings.json に
 
 ## Codex CLI の制約
 
-- Codex の hooks は現状 Windows では無効
+- Codex の hooks は、以前は Windows で無効だった。Codex CLI 0.169.0 では `hooks` 機能が stable・既定で有効になっている（`codex features list` で確認）。Windows での動作は実機で確かめること
 - Codex の Bash フックでは、Claude Code のように `Read` / `Write` を同じ粒度では遮断できない
 - そのため Codex 版は `config.toml`、`AGENTS.md`、rules、Bash hook の組み合わせで安全側に寄せています
 

@@ -72,6 +72,19 @@ Write-Host "[Install] AGENTS.md -> $codexDir"
 Copy-Item $sourceHooksJson (Join-Path $codexDir "hooks.json") -Force
 Write-Host "[Install] hooks.json -> $codexDir"
 
+# Merge personal hooks last, so they survive reinstall (~/.codex/hooks.personal.json)
+# Re-apply after editing the personal file: node ~/.codex/apply-personal.js ~/.codex/hooks.json ~/.codex/hooks.personal.json
+$applyPersonal = Join-Path (Split-Path -Parent $scriptDir) "apply-personal.js"
+if (Test-Path $applyPersonal) {
+    Copy-Item $applyPersonal (Join-Path $codexDir "apply-personal.js") -Force
+    node $applyPersonal (Join-Path $codexDir "hooks.json") (Join-Path $codexDir "hooks.personal.json")
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[Warn] personal hooks were not applied (see the error above)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[Skip] apply-personal.js not found: $applyPersonal"
+}
+
 Copy-Item (Join-Path $sourceHooksDir "*") $hooksDir -Recurse -Force
 Write-Host "[Install] hooks/ -> $hooksDir"
 

@@ -97,6 +97,19 @@ if (Test-Path $applyProvider) {
     Write-Host "[Skip] apply-provider.js not found: $applyProvider"
 }
 
+# Merge personal settings last, so they survive reinstall (~/.claude/settings.personal.json)
+# Re-apply after editing the personal file: node ~/.claude/apply-personal.js
+$applyPersonal = Join-Path $scriptDir "apply-personal.js"
+if (Test-Path $applyPersonal) {
+    Copy-Item $applyPersonal (Join-Path $claudeDir "apply-personal.js") -Force
+    node $applyPersonal (Join-Path $claudeDir "settings.json") (Join-Path $claudeDir "settings.personal.json")
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[Warn] personal settings were not applied (see the error above)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[Skip] apply-personal.js not found: $applyPersonal"
+}
+
 # Copy provider files (for ad-hoc switching: claude --settings ~/.claude/providers/<name>.json)
 $sourceProviders = Join-Path $scriptDir "providers"
 if (Test-Path $sourceProviders) {
